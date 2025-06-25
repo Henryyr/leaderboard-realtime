@@ -1,5 +1,15 @@
+// Dynamic base URL
+const apiBase = window.location.origin;
+
+// Helper for ws protocol
+function wsProtocol() {
+    return window.location.protocol === "https:" ? "wss:" : "ws:";
+}
+const wsBase = wsProtocol() + "//" + window.location.host;
+
+// Fetch leaderboard
 function fetchLeaderboard() {
-    fetch("http://localhost:3100/leaderboard")
+    fetch(apiBase + "/leaderboard")
         .then(res => res.json())
         .then(data => {
             const list = document.getElementById("leaderboard");
@@ -28,7 +38,7 @@ function fetchLeaderboard() {
 }
 
 // WebSocket
-const ws = new WebSocket("ws://localhost:3100/ws");
+const ws = new WebSocket(wsBase + "/ws");
 
 ws.onopen = () => {
     console.log("WebSocket connected");
@@ -57,7 +67,7 @@ form.addEventListener("submit", function(e) {
     const originalBtnContent = pressBtn.innerHTML;
     pressBtn.innerHTML = `<span class="loading-spinner" style="margin:0 auto;display:inline-block;vertical-align:middle;"></span>`;
 
-    fetch("http://localhost:3100/submit", {
+    fetch(apiBase + "/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, point: 1 })

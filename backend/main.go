@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -16,29 +18,46 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load(".env")
+
 	app := fiber.New()
 
-	app.Use(cors.New())
+	appEnv := os.Getenv("APP_ENV")
 
-	// Serve static files from ../public
+	// CORS config: allow all origins in development, default in production
+	if appEnv == "production" {
+		app.Use(cors.New())
+	} else {
+		app.Use(cors.New(cors.Config{
+			AllowOrigins: "*",
+			AllowHeaders: "Origin, Content-Type, Accept",
+		}))
+	}
+
+	// Path public folder
+	var publicPath string
+	if appEnv == "production" {
+		publicPath = "./public"
+	} else {
+		publicPath = "../public"
+	}
+
 	app.Use("/", filesystem.New(filesystem.Config{
-		Root:   http.Dir("../public"),
+		Root:   http.Dir(publicPath),
 		Browse: true,
 		Index:  "index.html",
 		MaxAge: 3600,
 	}))
 
-	// Connect to Redis using REDIS_URL env variable
-	redisURL := os.Getenv("REDIS_URL")
-	if redisURL != "" {
-		// override config.ConnectRedis to use redisURL if present
-		os.Setenv("REDIS_URL", redisURL)
-	}
 	config.ConnectRedis()
 
 	app.Post("/submit", handler.SubmitScore)
 	app.Get("/leaderboard", handler.GetLeaderBoard)
 	app.Get("/ws", ws.WebSocketHandler, websocket.New(ws.WebSocketConn))
 
-	log.Fatal(app.Listen(":3100"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3100"
+	}
+	log.Fatal(app.Listen(":" + port))
 }
