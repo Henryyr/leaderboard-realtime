@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"strconv"
 
 	"leaderboard-realtime/config"
@@ -8,7 +9,6 @@ import (
 	ws "leaderboard-realtime/websocket"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 )
 
 func SubmitScore(c *fiber.Ctx) error {
@@ -17,18 +17,25 @@ func SubmitScore(c *fiber.Ctx) error {
 		return c.Status(400).SendString("Invalid Request")
 	}
 
-	_, err := config.Rdb.ZAdd(config.Ctx, "leaderboard", redis.Z{
-		Score:  body.Score,
-		Member: body.Username,
-	}).Result()
+	// Ambil point, fallback ke score jika point kosong
+	point := body.Point
+	if point == 0 {
+		point = body.Score
+	}
+	if point <= 0 {
+		point = 1
+	}
 
+	log.Printf("DEBUG: SubmitScore received: username=%s, point=%v\n", body.Username, point)
+
+	_, err := config.Rdb.ZIncrBy(config.Ctx, "leaderboard", point, body.Username).Result()
 	if err != nil {
 		return c.Status(500).SendString("Gagal Simpan Score")
 	}
 
 	ws.HubInstance.Broadcast([]byte("update"))
 
-	return c.SendString("Score submitted")
+	return c.SendString("")
 }
 
 func GetLeaderBoard(c *fiber.Ctx) error {

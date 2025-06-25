@@ -12,11 +12,11 @@
             <ul id="leaderboard"></ul>
         </div>
         <div class="submit-form">
-            <h2>Submit Score</h2>
+            <h2>Press Counter</h2>
             <form id="scoreForm">
                 <input type="text" id="username" placeholder="Username" required />
-                <input type="number" id="score" placeholder="Score" required />
-                <button type="submit">Submit</button>
+                <button type="submit" id="pressBtn">Press</button>
+                <div class="loading-spinner" id="loadingSpinner" style="display:none;"></div>
             </form>
             <div class="message" id="formMessage"></div>
         </div>
