@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Realtime Leaderboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="leaderboard">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboard"></ul>
+        </div>
+        <div class="submit-form">
+            <h2>Submit Score</h2>
+            <form id="scoreForm">
+                <input type="text" id="username" placeholder="Username" required />
+                <input type="number" id="score" placeholder="Score" required />
+                <button type="submit">Submit</button>
+            </form>
+            <div class="message" id="formMessage"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
