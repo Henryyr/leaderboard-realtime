@@ -24,13 +24,14 @@ func main() {
 
 	appEnv := os.Getenv("APP_ENV")
 
-	// CORS config: allow all origins in development, default in production
+	// CORS config: allow all origins in production, allow localhost in dev
 	if appEnv == "production" {
 		app.Use(cors.New())
 	} else {
 		app.Use(cors.New(cors.Config{
-			AllowOrigins: "*",
-			AllowHeaders: "Origin, Content-Type, Accept",
+			AllowOrigins:     "http://localhost:3100,http://127.0.0.1:3100",
+			AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+			AllowCredentials: true,
 		}))
 	}
 
@@ -45,7 +46,7 @@ func main() {
 	app.Use("/", filesystem.New(filesystem.Config{
 		Root:   http.Dir(publicPath),
 		Browse: true,
-		Index:  "index.html",
+		Index:  "client.html",
 		MaxAge: 3600,
 	}))
 
